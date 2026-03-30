@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useMemo } from 'react'
+import { createContext, useContext, useState, useMemo, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { loginUser, registerUser } from '../api/authApi'
 
@@ -17,7 +17,10 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const login = async (credentials) => {
+  // useCallback makes these functions stable across renders
+  const clearError = useCallback(() => setError(null), [])
+
+  const login = useCallback(async (credentials) => {
     setLoading(true)
     setError(null)
     try {
@@ -33,9 +36,9 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     setLoading(true)
     setError(null)
     try {
@@ -50,18 +53,16 @@ export const AuthProvider = ({ children }) => {
       setLoading(false)
       return false
     }
-  }
+  }, [login])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
     setUser(null)
-  }
+  }, [])
 
-  const clearError = () => setError(null)
-
-  // Wrap value in useMemo to prevent unnecessary re-renders
+  // Now all functions are stable — useMemo won't recreate unnecessarily
   const value = useMemo(() => ({
     user,
     loading,
@@ -70,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     clearError,
-  }), [user, loading, error])
+  }), [user, loading, error, login, register, logout, clearError])
 
   return (
     <AuthContext.Provider value={value}>
@@ -79,7 +80,6 @@ export const AuthProvider = ({ children }) => {
   )
 }
 
-// PropTypes validation
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 }
