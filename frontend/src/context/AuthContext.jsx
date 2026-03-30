@@ -1,12 +1,17 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useMemo } from 'react'
+import PropTypes from 'prop-types'
 import { loginUser, registerUser } from '../api/authApi'
 
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user')
-    return stored ? JSON.parse(stored) : null
+    try {
+      const stored = localStorage.getItem('user')
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
+    }
   })
 
   const [loading, setLoading] = useState(false)
@@ -23,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user)
       return true
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed.')
+      setError(err.response?.data?.error || 'Login failed. Please try again.')
       return false
     } finally {
       setLoading(false)
@@ -35,12 +40,15 @@ export const AuthProvider = ({ children }) => {
     setError(null)
     try {
       await registerUser(userData)
-      return true
+      const loggedIn = await login({
+        email: userData.email,
+        password: userData.password,
+      })
+      return loggedIn
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed.')
-      return false
-    } finally {
+      setError(err.response?.data?.error || 'Registration failed. Please try again.')
       setLoading(false)
+      return false
     }
   }
 
@@ -53,11 +61,27 @@ export const AuthProvider = ({ children }) => {
 
   const clearError = () => setError(null)
 
+  // Wrap value in useMemo to prevent unnecessary re-renders
+  const value = useMemo(() => ({
+    user,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    clearError,
+  }), [user, loading, error])
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout, clearError }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )
+}
+
+// PropTypes validation
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 }
 
 export const useAuth = () => {
