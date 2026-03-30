@@ -1,0 +1,10 @@
+from django.contrib import admin
+from .models import Todo
+
+
+@admin.register(Todo)
+class TodoAdmin(admin.ModelAdmin):
+    list_display = ["id", "title", "user", "is_completed", "created_at"]
+    search_fields = ["title", "user__email"]
+    list_filter = ["is_completed"]
+    ordering = ["-created_at"]

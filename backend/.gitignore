@@ -1,0 +1,13 @@
+__pycache__/
+
+venv/
+
+.env
+
+*.sqlite3 
+
+.pytest_cache
+
+.coverage
+
+secrets/
