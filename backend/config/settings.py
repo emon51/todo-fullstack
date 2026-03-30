@@ -17,25 +17,26 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 SECRET_KEY = read_secret("secret_key", default="dev-secret-key")
 ALLOWED_HOSTS = ["*"]  # Restrict in production
 
-DJANGO_APPS = [
+
+INSTALLED_APPS = [
+    # Django apps
     "django.contrib.admin",
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-]
-THIRD_PARTY_APPS = [
+    # Third party apps
+    "corsheaders",
     "rest_framework",
     "django_filters",
-]
-LOCAL_APPS = [
+    # Local apps
     "apps.users",
     "apps.todos",
 ]
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware", 
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -105,3 +106,9 @@ STATIC_URL = "/static/"
 TIME_ZONE = "UTC"
 USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# CORS
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+]
