@@ -127,7 +127,7 @@ TODO_FULLSTACK/
 #### 1. Clone the repository
 ```bash
 git clone https://github.com/emon51/todo-fullstack.git
-cd todo_fullstack/backend
+cd todo-fullstack/backend
 ```
 
 #### 2. Create secrets directory and files
